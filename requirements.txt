@@ -4,3 +4,4 @@ tqdm
 dlib
 face_recognition
 opencv-contrib-python
+tensorboardX
