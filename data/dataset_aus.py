@@ -34,9 +34,9 @@ class AusDataset(DatasetBase):
             real_cond = self._get_cond_by_id(sample_id)
 
             if real_img is None:
-                print 'error reading image %s, skipping sample' % sample_id
+                print ('error reading image %s, skipping sample' % sample_id)
             if real_cond is None:
-                print 'error reading aus %s, skipping sample' % sample_id
+                print ('error reading aus %s, skipping sample' % sample_id)
 
         desired_cond = self._generate_random_cond()
 
@@ -91,12 +91,19 @@ class AusDataset(DatasetBase):
         self._transform = transforms.Compose(transform_list)
 
     def _read_ids(self, file_path):
-        ids = np.loadtxt(file_path, delimiter='\t', dtype=np.str)
+        if not os.path.exists(file_path):
+          raise FileNotFoundError(f"IDs file not found: {file_path}")
+        ids = np.loadtxt(file_path, delimiter='\t', dtype=str)
+        print(f"Read {len(ids)} IDs from {file_path}")
         return [id[:-4] for id in ids]
 
     def _read_conds(self, file_path):
+        if not os.path.exists(file_path):
+          raise FileNotFoundError(f"Conditions file not found: {file_path}")
         with open(file_path, 'rb') as f:
-            return pickle.load(f)
+            data = pickle.load(f, encoding='latin1')
+        print(f"Read conditions for {len(data.keys())} IDs")
+        return data
 
     def _get_cond_by_id(self, id):
         if id in self._conds:
