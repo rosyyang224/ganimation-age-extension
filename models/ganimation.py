@@ -103,9 +103,9 @@ class GANimation(BaseModel):
         self._input_real_img_path = input['real_img_path']
 
         if len(self._gpu_ids) > 0:
-            self._input_real_img = self._input_real_img.cuda(self._gpu_ids[0], async=True)
-            self._input_real_cond = self._input_real_cond.cuda(self._gpu_ids[0], async=True)
-            self._input_desired_cond = self._input_desired_cond.cuda(self._gpu_ids[0], async=True)
+            self._input_real_img = self._input_real_img.cuda(self._gpu_ids[0], non_blocking=True)
+            self._input_real_cond = self._input_real_cond.cuda(self._gpu_ids[0], non_blocking=True)
+            self._input_desired_cond = self._input_desired_cond.cuda(self._gpu_ids[0], non_blocking=True)
 
     def set_train(self):
         self._G.train()
@@ -222,6 +222,7 @@ class GANimation(BaseModel):
                 self._optimizer_G.step()
 
     def _forward_G(self, keep_data_for_visuals):
+
         # generate fake images
         fake_imgs, fake_img_mask = self._G.forward(self._real_img, self._desired_cond)
         fake_img_mask = self._do_if_necessary_saturate_mask(fake_img_mask, saturate=self._opt.do_saturate_mask)
