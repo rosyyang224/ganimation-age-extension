@@ -76,6 +76,11 @@ The model produces coherent age transformations while preserving facial identity
 However, limitations included uniform wrinkle application and some image blurriness due to training on a small data subset (1,000 images). Aging effects could be further localized with better supervision and larger datasets.
 
 ---
+
+## Project Report
+
+For more detailed methodology, results, and analysis, check out our [final report](./Adding_Aging_While_Maintaining_Facial_Animation.pdf).
+
 ## Authors
 
 - [@blfang](https://github.com/blfang)
