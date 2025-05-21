@@ -63,8 +63,6 @@ The model was trained on an AWS EC2 GPU instance, totaling ~70 hours. Validation
 
 Despite architectural improvements, some aging effects were applied uniformly across the face, lacking spatial specificity. The small training subset (1,000 images) limited generalization, and combining AU and age sometimes led to visual inconsistencies. Additionally, the attention mechanism was not always effective at prioritizing age-relevant regions.
 
-> Nevertheless, our architectural extensions—particularly the modular **Age ModNet**, **DisPatchGAN**, and **VGG perceptual supervision**—demonstrate that dual-control over expression and aging is achievable with strong identity preservation and expressive fidelity.
-
 ---
 
 ## Results Summary
@@ -75,7 +73,7 @@ The model produces coherent age transformations while preserving facial identity
 - Facial expressions remained stable under AU conditioning, even when combined with age transformations.
 - Using DisPatchGAN and VGG loss led to notable improvements in spatial detail and facial realism.
 
-> However, limitations included uniform wrinkle application and some image blurriness due to training on a small data subset (1,000 images). Aging effects could be further localized with better supervision and larger datasets.
+However, limitations included uniform wrinkle application and some image blurriness due to training on a small data subset (1,000 images). Aging effects could be further localized with better supervision and larger datasets.
 
 ---
 ## Authors
