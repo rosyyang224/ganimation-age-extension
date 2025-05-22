@@ -79,7 +79,7 @@ However, limitations included uniform wrinkle application and some image blurrin
 
 ## Project Report
 
-For more detailed methodology, results, and analysis, check out our [final report](./Adding_Aging_While_Maintaining_Facial_Animation.pdf).
+For more detailed methodology, results, and analysis, check out our [final report](./docs/Adding_Aging_While_Maintaining_Facial_Animation.pdf).
 
 ## Authors
 
