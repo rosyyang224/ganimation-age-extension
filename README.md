@@ -1,48 +1,101 @@
-<img src='http://www.albertpumarola.com/images/2018/GANimation/face1_cyc.gif' align="right" width=90>
+# GANimation-Age-Extension
 
-# GANimation: Anatomically-aware Facial Animation from a Single Image
-### [[Project]](http://www.albertpumarola.com/research/GANimation/index.html)[ [Paper]](https://rdcu.be/bPuaJ) 
-Official implementation of [GANimation](http://www.albertpumarola.com/research/GANimation/index.html). In this work we introduce a novel GAN conditioning scheme based on Action Units (AU) annotations, which describe in a continuous manifold the anatomical facial movements defining a human expression. Our approach permits controlling the magnitude of activation of each AU and combine several of them. For more information please refer to the [paper](https://arxiv.org/abs/1807.09251).
+This project extends the [GANimation](https://github.com/albertpumarola/GANimation) framework to incorporate age progression and regression alongside Action Unit (AU)-driven facial animation. It enables realistic and identity-preserving aging while maintaining dynamic facial expressions.
 
-This code was made public to share our research for the benefit of the scientific community. Do NOT use it for immoral purposes.
+> Developed for the 10-423/623 Generative AI Course @ Carnegie Mellon University  
+> By Brendon Fang, Max Fang & Rosemary Yang
 
-![GANimation](http://www.albertpumarola.com/images/2018/GANimation/teaser.png)
+---
 
-## Prerequisites
-- Install PyTorch (version 0.3.1), Torch Vision and dependencies from http://pytorch.org
-- Install requirements.txt (```pip install -r requirements.txt```)
+## Project Overview
 
-## Data Preparation
-The code requires a directory containing the following files:
-- `imgs/`: folder with all image
-- `aus_openface.pkl`: dictionary containing the images action units.
-- `train_ids.csv`: file containing the images names to be used to train.
-- `test_ids.csv`: file containing the images names to be used to test.
+Traditional GAN-based facial animation focuses on expressions. Our work introduces a novel age modulation network that allows simultaneous control over emotion (via AUs) and age transformation (via scalar conditioning), all while preserving facial structure and identity.
 
-An example of this directory is shown in `sample_dataset/`.
+### Key Contributions:
+- **Age-Expression Co-Control:** Jointly manipulate facial expressions and age
+- **Age Modulation Network:** Separate module to encode age features
+- **VGG-based Perceptual Loss:** For identity and high-level consistency
+- **DisPatchGAN Discriminator:** For patch-based realism (e.g., wrinkles)
+- Trained on **FFHQ** and **CACD** datasets
 
-To generate the `aus_openface.pkl` extract each image Action Units with [OpenFace](https://github.com/TadasBaltrusaitis/OpenFace/wiki/Action-Units) and store each output in a csv file the same name as the image. Then run:
-```
-python data/prepare_au_annotations.py
-```
+---
+## Architecture
 
-## Run
-To train:
-```
-bash launch/run_train.sh
-```
-To test:
-```
-python test --input_path path/to/img
-```
+Our architecture introduces an age-aware conditioning mechanism, enhanced loss functions, and a discriminator capable of multi-attribute supervision.
 
-## Citation
-If you use this code or ideas from the paper for your research, please cite our paper:
-```
-@article{Pumarola_ijcv2019,
-    title={GANimation: One-Shot Anatomically Consistent Facial Animation},
-    author={A. Pumarola and A. Agudo and A.M. Martinez and A. Sanfeliu and F. Moreno-Noguer},
-    booktitle={International Journal of Computer Vision (IJCV)},
-    year={2019}
-}
-```
+#### Inputs and Conditioning
+
+The model takes three inputs: a high-resolution input image, an Action Unit (AU) vector that encodes facial expressions, and a scalar age value indicating the target age. To enable disentangled conditioning, the age scalar is passed through a lightweight Age Modulation Network that transforms it into a 128-dimensional style embedding. This embedding is then concatenated with the AU vector to form a unified condition vector. After spatial expansion, this condition vector is concatenated with the input image and passed to the generator.
+
+#### Generator
+
+The generator produces two outputs: a synthesized image and an attention mask. The attention mask focuses the transformation on facial regions relevant to the target AUs and age. To guide training, the generator is optimized using a combination of loss functions:
+- **AU Consistency Loss** (mean squared error between target and predicted AUs)
+- **Age Consistency Loss** (MSE between predicted and target age)
+- **Cycle Consistency Loss** and **Mask Smoothness Loss** (from original GANimation)
+- **VGG Perceptual Loss** (for high-level structural fidelity)
+- **GAN Loss** (adversarial training)
+
+These losses ensure the generated face accurately reflects the conditioning inputs while maintaining identity and coherence.
+
+#### Discriminator Enhancements
+
+The discriminator was adapted into a multi-task architecture that simultaneously evaluates:
+- Whether the image is real or fake
+- Whether the facial expression matches the AU vector
+- Whether the predicted age aligns with the target scalar
+
+To improve spatial realism, we integrated **DisPatchGAN**, a patch-based variant of the discriminator that evaluates local image regions for high-frequency details like wrinkles and texture. A toggle allows switching between standard and patch-based discriminators for experimentation.
+
+#### Perceptual Supervision
+
+A pre-trained **VGG network** is used to compute a perceptual loss by comparing the high-level feature representations of real and synthesized images. This encourages the generator to preserve identity and facial structure across transformations.
+
+#### Training Setup
+
+Training was conducted in two stages:
+- Stage 1: 10 epochs on the FFHQ dataset with batch size 8 and learning rate 1e-4
+- Stage 2: 15 fine-tuning epochs on 1024×1024 images with batch size 2 and learning rate 1e-5
+
+The model was trained on an AWS EC2 GPU instance, totaling ~70 hours. Validation used qualitative visual assessment.
+
+#### Observed Limitations
+
+Despite architectural improvements, some aging effects were applied uniformly across the face, lacking spatial specificity. The small training subset (1,000 images) limited generalization, and combining AU and age sometimes led to visual inconsistencies. Additionally, the attention mechanism was not always effective at prioritizing age-relevant regions.
+
+---
+
+## Results Summary
+
+The model produces coherent age transformations while preserving facial identity and expressions. Key takeaways from our experiments:
+
+- Wrinkle patterns and skin tone changes were successfully generated, with consistency across the age range (25–69).
+- Facial expressions remained stable under AU conditioning, even when combined with age transformations.
+- Using DisPatchGAN and VGG loss led to notable improvements in spatial detail and facial realism.
+
+However, limitations included uniform wrinkle application and some image blurriness due to training on a small data subset (1,000 images). Aging effects could be further localized with better supervision and larger datasets.
+
+---
+
+## Project Report
+
+For more detailed methodology, results, and analysis, check out our [final report](./Adding_Aging_While_Maintaining_Facial_Animation.pdf).
+
+## Authors
+
+- [@blfang](https://github.com/blfang)
+- [@msfang](https://github.com/msfang)
+- [@rosyyang224](https://github.com/rosyyang224)
+
+---
+
+## Acknowledgments
+
+This project builds on [GANimation](https://github.com/albertpumarola/GANimation) by [Pumarola et al. (2018)] and draws dataset inspiration from [FFHQ](https://paperswithcode.com/dataset/ffhq) and [CACD](https://paperswithcode.com/dataset/cacd). Thank you to the 10-423/623 teaching team for guidance and feedback.
+
+---
+
+## License
+
+MIT License — open to collaboration and improvement.  
+If you use or build on this, please cite!
