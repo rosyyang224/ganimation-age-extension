@@ -19,6 +19,7 @@ Traditional GAN-based facial animation focuses on expressions. Our work introduc
 - Trained on **FFHQ** and **CACD** datasets
 
 ---
+
 ## Architecture
 
 Our architecture introduces an age-aware conditioning mechanism, enhanced loss functions, and a discriminator capable of multi-attribute supervision.
@@ -87,6 +88,35 @@ For more detailed methodology, results, and analysis, check out our [final repor
 - [@msfang](https://github.com/msfang)
 - [@rosyyang224](https://github.com/rosyyang224)
 
+---
+
+## How to Run the Code
+- Install PyTorch (version 0.3.1), Torch Vision and dependencies from http://pytorch.org
+- Install requirements.txt (```pip install -r requirements.txt```)
+
+#### Data Preparation
+The code requires a directory containing the following files:
+- `imgs/`: folder with all image
+- `aus_openface.pkl`: dictionary containing the images action units.
+- `train_ids.csv`: file containing the images names to be used to train.
+- `test_ids.csv`: file containing the images names to be used to test.
+
+An example of this directory is shown in `sample_dataset/`.
+
+To generate the `aus_openface.pkl` extract each image Action Units with [OpenFace](https://github.com/TadasBaltrusaitis/OpenFace/wiki/Action-Units) and store each output in a csv file the same name as the image. Then run:
+```
+python data/prepare_au_annotations.py
+```
+
+#### Run
+To train:
+```
+bash launch/run_train.sh
+```
+To test:
+```
+python test --input_path path/to/img
+```
 ---
 
 ## Acknowledgments
